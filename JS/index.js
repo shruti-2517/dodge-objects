@@ -317,13 +317,25 @@ if (activeObstacles.length >= dynamicMax) return;
     padding;
    obstacleEl.style.left = `${x}px`;
   obstacleEl.style.top = "-42px";
+  // Initial transform state
+  obstacleEl.style.transform = "translateX(0px) rotate(0deg)";
   gameArea.appendChild(obstacleEl);
 
   const obstacle = {
     el: obstacleEl,
     x,
     y: -42,
-    speed: gameState.obstacleSpeed,
+    // Random speed variation
+    speed: gameState.obstacleSpeed * (0.85 + Math.random() * 0.4),
+    // Gravity to accelerate fall
+    gravity: 20 + Math.random() * 60,
+    // Rotation state and speed
+    rotation: Math.random() * 360,
+    rotationSpeed: (Math.random() * 360 - 180), // degrees per second
+    // Wobble parameters
+    wobbleAmplitude: 4 + Math.random() * 17,
+    wobbleFrequency: 0.002 + Math.random() * 0.02,
+    phase: Math.random() * 1000,
   };
 
   activeObstacles.push(obstacle);
@@ -335,7 +347,20 @@ function updateObstacles(deltaSeconds) {
 
   for (let i = activeObstacles.length - 1; i >= 0; i -= 1) {
     const obstacle = activeObstacles[i];
+    
+   // Gravity: velocity increases with g·t, then position updates using velocity
+    obstacle.speed += obstacle.gravity * deltaSeconds;
     obstacle.y += obstacle.speed * deltaSeconds;
+
+    // Wobble effect and attraction to player
+    const wobbleX = Math.sin((obstacle.y + (obstacle.phase || 0)) * (obstacle.wobbleFreq || 0.01)) * (obstacle.wobbleAmp || 6);
+    const attractionX = (playerState.x - obstacle.x) * 0.07;  // moves a small % toward player each frame
+    const totalX = wobbleX + attractionX;
+   
+    // Rotation: angle increases steadily over time
+    obstacle.rotation += obstacle.rotationSpeed * deltaSeconds;
+
+    obstacle.el.style.transform = `translateX(${totalX}px) rotate(${obstacle.rotation}deg)`;
     obstacle.el.style.top = `${obstacle.y}px`;
 
     if (obstacle.y > floorY) {

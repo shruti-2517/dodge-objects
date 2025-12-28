@@ -102,6 +102,8 @@
   background: radial-gradient(circle at 30% 30%, #f97316, #ea580c);
   box-shadow: 0 0 8px rgba(251, 146, 60, 0.5),
     0 6px 14px rgba(248, 113, 113, 0.4);
+  will-change: transform, top, left;
+  transform-origin: center;
 }
 
 /* Overlay and controls */
